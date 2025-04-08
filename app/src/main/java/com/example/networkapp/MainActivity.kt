@@ -14,6 +14,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
+import java.io.File
 
 // TODO (1: Fix any bugs)
 // TODO (2: Add function saveComic(...) to save comic info when downloaded
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var numberEditText: EditText
     lateinit var showButton: Button
     lateinit var comicImageView: ImageView
+    private val internalFileName = "comic_file"
+    private lateinit var file: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         showButton = findViewById<Button>(R.id.showComicButton)
         comicImageView = findViewById<ImageView>(R.id.comicImageView)
 
+        file = File(filesDir, internalFileName)
+
         showButton.setOnClickListener {
             downloadComic(numberEditText.text.toString())
         }
@@ -51,7 +56,10 @@ class MainActivity : AppCompatActivity() {
         val url = "https://xkcd.com/$comicId/info.0.json"
         requestQueue.add (
             JsonObjectRequest(url
-                , {showComic(it)}
+                , {
+                    saveComic(it)//saves the comic while downloading
+                    showComic(it)
+                  }
                 , {}
             )
         )
@@ -66,7 +74,15 @@ class MainActivity : AppCompatActivity() {
 
     // Implement this function
     private fun saveComic(comicObject: JSONObject) {
-
+        try{
+            val fileOutput = openFileOutput(internalFileName, MODE_PRIVATE)
+            fileOutput.write(comicObject.toString().toByteArray())
+            fileOutput.close()
+            Toast.makeText(this, "Comic saved!", Toast.LENGTH_SHORT).show()
+        }catch (e: Exception){
+            e.printStackTrace()
+            Toast.makeText(this, "Error saving comic", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
