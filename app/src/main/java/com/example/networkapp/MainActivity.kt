@@ -45,6 +45,19 @@ class MainActivity : AppCompatActivity() {
 
         file = File(filesDir, internalFileName)
 
+        if(file.exists()){
+            try{
+                val fileInput = openFileInput(internalFileName)
+                val content = fileInput.bufferedReader().use { it.readText() }
+                fileInput.close()
+                showComic(JSONObject(content))
+                Toast.makeText(this, "Loaded saved comic", Toast.LENGTH_SHORT).show()
+            }catch (e: Exception){
+                e.printStackTrace()
+                Toast.makeText(this, "No saved comic found", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         showButton.setOnClickListener {
             downloadComic(numberEditText.text.toString())
         }
